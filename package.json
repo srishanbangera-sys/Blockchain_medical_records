@@ -9,5 +9,8 @@
     "migrate": "npm --prefix Medic@Chain run migrate",
     "test": "npm --prefix Medic@Chain run test",
     "start": "npm --prefix Medic@Chain start"
+  },
+  "devDependencies": {
+    "wrangler": "^4.86.0"
   }
 }

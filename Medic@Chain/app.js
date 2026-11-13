@@ -6,13 +6,19 @@ var logger = require('morgan');
 var Web3 = require('web3');
 
 // I M P O R T     C O M P I L E D     O U T P U T     O F     M E D I C A L C H A I N     C O N T R A C T     F R O M     B U I L D     D I R E C T O R Y
-var MyContractJSON = require(path.join(__dirname,'build/contracts/MedicalChain.json'));
+var MyContractJSON = require(path.join(__dirname, 'build/contracts/MedicalChain.json'));
 
 // E S T A B L I S H     C O N N E C T I O N     W I T H     L O C A L     G E T H     P R I V A T E     C H A I N
-web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+var rpcUrl = process.env.RPC_URL || 'http://127.0.0.1:8545';
+var networkId = process.env.NETWORK_ID || '4002';
+global.web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
 // G E T     C O N T R A C T     A D D R E S S ,   F R O M     N E T W O R K     I D     4 0 0 2  (N/W ID OF PRIVATE CHAIN)
-contractAddress = MyContractJSON.networks['4002'].address;
+var deployedNetwork = MyContractJSON.networks[networkId];
+if (!deployedNetwork || !deployedNetwork.address) {
+  throw new Error('MedicalChain is not deployed to network ' + networkId + '. Run `npm run migrate` after starting the local chain.');
+}
+var contractAddress = deployedNetwork.address;
 
 // C O N T R A C T     A D D R E S S
 console.log("\nC O N T R A C T     A D D R E S S : "+contractAddress+"\n");
@@ -21,7 +27,7 @@ console.log("\nC O N T R A C T     A D D R E S S : "+contractAddress+"\n");
 const abi = MyContractJSON.abi;
 
 //  C R E A T I N G     C O N T R A C T     O B J E C T
-MyContract = new web3.eth.Contract(abi,contractAddress);
+global.MyContract = new web3.eth.Contract(abi, contractAddress);
 
 
 var indexRouter = require('./routes/index');

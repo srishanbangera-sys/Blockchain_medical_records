@@ -1,0 +1,14 @@
+# Node.js dependencies and logs
+node_modules/
+**/node_modules/
+npm-debug.log*
+
+# Historical local Geth networks contain node identities and wallet keystores.
+/PrivateNetwork/
+/Private_Network_truffle/
+
+# Local environment and generated scratch files
+.env
+.env.*
+!.env.example
+.DS_Store

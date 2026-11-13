@@ -3,7 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "chain": "ganache --server.host 127.0.0.1 --server.port 8545 --chain.networkId 4002 --chain.chainId 4002 --wallet.deterministic",
+    "compile": "node ./scripts/compile.js",
+    "migrate": "npm run compile && node ./scripts/migrate.js",
+    "test": "npm run compile && node --test test/*.test.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -12,6 +16,8 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
-    "web3": "^1.2.1"
+    "web3": "1.10.4",
+    "ganache": "7.9.2",
+    "solc": "0.5.8"
   }
 }

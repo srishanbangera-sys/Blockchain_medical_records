@@ -44,30 +44,53 @@ router.get('/setDrRecords', function(req, res, next) {
 
 
 // S I G N I N G     W I T H     A D M I N     I N F O
-router.post('/admin_reg',function(req,res,next){
-  var admin = req.body.a_adrs;
-  var pswd = req.body.a_pswd;
-  console.log("\n\nA D M I N     L O G I N     S U C C E S S F U L L\n\n");
-  res.send({done:1,adrs:admin,message:"ADMIN LOGIN SUCCESSFULL"});
-})
+router.post('/admin_reg', async function(req, res, next) {
+  try {
+    var accounts = await web3.eth.getAccounts();
+    var admin = req.body.a_adrs;
+    if (!web3.utils.isAddress(admin) || !accounts.length || admin.toLowerCase() !== accounts[0].toLowerCase() || req.body.a_pswd !== '123') {
+      return res.status(401).send({ done: 0, message: 'Invalid local admin account or demo PIN.' });
+    }
+    res.send({ done: 1, adrs: admin, message: 'ADMIN LOGIN SUCCESSFUL' });
+  } catch (err) {
+    next(err);
+  }
+});
 
 
 // S I G N I N G     W I T H     D O C T O R     I N F O
-router.post('/doctor_reg',function(req,res,next){
-  var doctor = req.body.d_adrs;
-  var pswd = req.body.a_pswd;
-  console.log("\n\nD O C T O R     L O G I N     S U C C E S S F U L L\n\n");
-  res.send({done:1,dadrs:doctor,message:"DOCTOR LOGIN SUCCESSFULL"});
+router.post('/doctor_reg', async function(req, res, next) {
+  try {
+    var doctor = req.body.d_adrs;
+    var accounts = await web3.eth.getAccounts();
+    if (!web3.utils.isAddress(doctor) || !accounts.some(function(account) { return account.toLowerCase() === doctor.toLowerCase(); }) || req.body.d_pswd !== '123') {
+      return res.status(401).send({ done: 0, message: 'Invalid local doctor account or demo PIN.' });
+    }
+    var details = await MyContract.methods.getDoctorDetails(doctor).call({ from: accounts[0] });
+    if (!details._state) {
+      return res.status(403).send({ done: 0, message: 'This account is not a registered doctor.' });
+    }
+    res.send({ done: 1, dadrs: doctor, message: 'DOCTOR LOGIN SUCCESSFUL' });
+  } catch (err) {
+    next(err);
+  }
 });
 
 
 
 // S I G N I N G     W I T H     P A T I E N T     I N F O
-router.post('/patients_reg',function(req,res,next){
-  var patient = req.body.p_adrs;
-  var pswd = req.body.p_pswd;
-  console.log("\n\nP A T I E N T     L O G I N     S U C C E S S F U L L\n\n");
-  res.send({done:1,padrs:patient,message:"PATIENT LOGIN SUCCESSFULL"});
+router.post('/patients_reg', async function(req, res, next) {
+  try {
+    var patient = req.body.p_adrs;
+    var accounts = await web3.eth.getAccounts();
+    if (!web3.utils.isAddress(patient) || !accounts.some(function(account) { return account.toLowerCase() === patient.toLowerCase(); }) || req.body.p_pswd !== '123') {
+      return res.status(401).send({ done: 0, message: 'Invalid local patient account or demo PIN.' });
+    }
+    await MyContract.methods.getPatientDetails(patient).call({ from: patient });
+    res.send({ done: 1, padrs: patient, message: 'PATIENT LOGIN SUCCESSFUL' });
+  } catch (err) {
+    res.status(403).send({ done: 0, message: 'This account is not a registered patient.' });
+  }
 });
  
 
